@@ -1,0 +1,42 @@
+{
+	"manifest_version": 2,
+	"name": "rdfjs-svelte-demo",
+	"version": "0.1.0",
+
+	"description": "RDFJS-Svelte Web-Extension demo.",
+
+	"chrome_settings_overrides": {
+		"homepage": "index.html"
+	},
+
+	"icons": {
+		"32": "icons/cube.svg",
+		"48": "icons/cube.svg"
+	},
+
+	"browser_action": {
+		"default_title": "RDFJS-Svelte",
+		"default_popup": "index.html"
+	},
+
+	"protocol_handlers": [{
+		"protocol": "ext+rdfjs",
+		"name": "RDFJS-Svelte",
+		"uriTemplate": "index.html#/components?context=%s"
+	}],
+
+	"permissions": [
+		"*",
+		"<all_urls>",
+		"notifications",
+		"nativeMessaging",
+		"tabs",
+		"activeTab",
+		"storage",
+		"unlimitedStorage",
+		"clipboardWrite",
+		"clipboardRead",
+		"contextMenus"
+	]
+
+}
