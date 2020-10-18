@@ -62,25 +62,9 @@
 
 <main>
   <h1>RDFJS-Svelte</h1>
-  <p>
-    <a href="https://svelte.dev/">Svelte</a>
-    components to edit
-    <a href="http://rdf.js.org/">RDFSJS</a>
-    objects such as Literals, NamedNodes and Datasets.
-  </p>
-  <p>
-    The sources are available on
-    <a href="https://github.com/linked-solutions/rdfjs-svelte">GitHub</a>
-    .
-  </p>
-  <p>
-    Also check out
-    <a href="https://rdfjs-vue.linked.solutions/">RDFSJS Vue</a>
-    which offers similar functionality for
-    <a href="https://vuejs.org/">Vue</a>
-    instead of Svelte.
-  </p>
+
   <p>Try out the Dataset Browser below or any component <a href="/components" use:link>here</a>.</p>
+  <p>Use SPARQL <a href="/sparql" use:link>here</a>.</p>
   <DatasetBrowser
     bind:value={dataset}
     subject="http://example.org/person/sheldon-cooper"
