@@ -2,7 +2,34 @@
   import YASQE from '@triply/yasqe'
   import YASR from '@triply/yasr'
   import {afterUpdate} from 'svelte'
-  console.log('yasqe', YASQE)
+  import {RdfStore} from 'quadstore'
+  import * as dataFactory from '@rdfjs/data-model'
+  import memdown from 'memdown'
+
+  const db = memdown()
+
+  const opts = {
+    backend: db,
+    dataFactory 
+  }
+
+  const store = new RdfStore(opts);
+
+  const quads = [];
+  for (let i = 0; i < 20; i++) {
+    quads.push(
+      quad(
+        namedNode("http://ex.com/s" + i),
+        namedNode("http://ex.com/p" + i),
+        namedNode("http://ex.com/o" + i)/*,
+        namedNode("http://ex.com/g")*/
+      )
+    );
+  }
+  store.put(quads).then(() => {
+    console.log("Put succeded.");
+  });
+  
 
   let queryElement
   let resultElement
@@ -22,9 +49,8 @@
       }
     })
     const origQueryFunction = yasqe.query;
-    /*yasqe.query = function() {
-      const sparqlEngineInstance = new SparqlEngine(store);
-      sparqlEngineInstance.query(yasqe.getValue(), 'application/sparql-results+json'
+    yasqe.query = function() {
+      store.sparql(yasqe.getValue(), 'application/sparql-results+json'
       ).catch((err) => {
           console.log("err: ", err);
       }).then((result) => {
@@ -32,7 +58,7 @@
           yasr.setResponse(result);
       });
       return Promise.resolve(true);
-    }*/
+    }
   });
 </script>
 
