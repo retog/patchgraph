@@ -6,7 +6,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
     "dev": "webpack serve",
-    "deploy-app": "patchboot-install public/build/bundle.js 'patchgraph' 'collaboratively create a knowledge graph in scuttleverse'",
+    "deploy-app": "patchboot-install public/bundle.js 'patchgraph' 'Collaboratively create a knowledge graph in scuttleverse'",
     "deploy": "run-s build deploy-app"
   },
   "devDependencies": {
