@@ -64,8 +64,7 @@
     const yasr = new YASR(resultElement, {
       pluginOrder: ['table', 'response'],
       prefixes: {
-        rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-        doi: 'http://dx.doi.org/'
+        rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
       }
     })
     const origQueryFunction = yasqe.query;
@@ -75,14 +74,21 @@
         backend: leveljs('quadstore'),
       });
       await store.open();
-      store.sparql(yasqe.getValue(), 'application/sparql-results+json'
-      ).catch((err) => {
-          console.log("err: ", err);
-      }).then((result) => {
-          console.log("result!: ", result);
-          yasr.setResponse(result);
-      });
-      await store.clode();
+      try {
+        const result = await store.sparql(yasqe.getValue())
+        console.log("result!: ", result);
+        yasr.setResponse({ 
+          data: result,
+          contentType: "application/json"
+        });
+      } catch (e) {
+        console.log('exception executing sparql', e)
+        yasr.setResponse({ 
+          data: e,
+          contentType: "text/plain"
+        });
+      }
+      await store.close();
       return true;
     }
   });
