@@ -2,33 +2,52 @@
   import YASQE from '@triply/yasqe'
   import YASR from '@triply/yasr'
   import {afterUpdate} from 'svelte'
-  import {RdfStore} from 'quadstore'
+  import {Quadstore} from 'quadstore'
   import * as dataFactory from '@rdfjs/data-model'
-  import memdown from 'memdown'
+  import leveljs from 'level-js';
 
-  const db = memdown()
 
-  const opts = {
-    backend: db,
-    dataFactory 
-  }
+  const main = async () => {
+    console.log('Ok, if we\'re here the browser has loaded everything correctly');
+    console.log('lelevjs', leveljs)
+    const backend = leveljs('quadstore')
+    const store = new Quadstore({
+      dataFactory,
+      backend: leveljs('quadstore'),
+    });
+    console.log('We have instantiated the store');
+    await store.open();
+    console.log('We have opened the store');
+    await store.put(dataFactory.quad(
+      dataFactory.namedNode('http://example.com/theanswer'),
+      dataFactory.namedNode('http://example.com/is'),
+      dataFactory.literal('42', dataFactory.namedNode('https://www.w3.org/2001/XMLSchema#interger')),
+    ));
+    console.log('We have added a quad');
+    const results = await store.get({});
+    console.log('We have queried the store and got the following quads', results.items);
 
-  const store = new RdfStore(opts);
-
-  const quads = [];
-  for (let i = 0; i < 20; i++) {
-    quads.push(
-      quad(
-        namedNode("http://ex.com/s" + i),
-        namedNode("http://ex.com/p" + i),
-        namedNode("http://ex.com/o" + i)/*,
-        namedNode("http://ex.com/g")*/
-      )
-    );
-  }
-  store.put(quads).then(() => {
+    for (let i = 0; i < 20; i++) {
+      await store.put(
+        dataFactory.quad(
+          dataFactory.namedNode("http://ex.com/s" + i),
+          dataFactory.namedNode("http://ex.com/p" + i),
+          dataFactory.namedNode("http://ex.com/o" + i),
+          dataFactory.namedNode("http://ex.com/g")
+        )
+      );
+    }
+    
     console.log("Put succeded.");
+    
+    await store.close();
+    console.log('We have closed the store');
+  };
+
+  main().catch((err) => {
+    console.error(err);
   });
+
   
 
   let queryElement

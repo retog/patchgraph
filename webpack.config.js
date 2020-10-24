@@ -48,5 +48,17 @@ module.exports = {
 	plugins: [
 
 	],
-	devtool: prod ? false: 'source-map'
+  devtool: prod ? false: 'source-map',
+  devServer: {
+    contentBase: path.join(__dirname, 'public'),
+  },
+  target: 'web',
+  externals: [
+    (context, request, callback) => {
+      if (request.startsWith('_webpack_ignored_')) {
+        return callback(null, 'commonjs2 ' + request);
+      }
+      callback();
+    },
+  ]
 };
