@@ -2,7 +2,53 @@
   import YASQE from '@triply/yasqe'
   import YASR from '@triply/yasr'
   import {afterUpdate} from 'svelte'
-  console.log('yasqe', YASQE)
+  import {Quadstore} from 'quadstore'
+  import * as dataFactory from '@rdfjs/data-model'
+  import leveljs from 'level-js';
+
+
+  const main = async () => {
+    console.log('Ok, if we\'re here the browser has loaded everything correctly');
+    console.log('lelevjs', leveljs)
+    const backend = leveljs('quadstore')
+    const store = new Quadstore({
+      dataFactory,
+      backend: leveljs('quadstore'),
+    });
+    console.log('We have instantiated the store');
+    await store.open();
+    console.log('We have opened the store');
+    await store.put(dataFactory.quad(
+      dataFactory.namedNode('http://example.com/theanswer'),
+      dataFactory.namedNode('http://example.com/is'),
+      dataFactory.literal('42', dataFactory.namedNode('https://www.w3.org/2001/XMLSchema#interger')),
+    ));
+    console.log('We have added a quad');
+    const results = await store.get({});
+    console.log('We have queried the store and got the following quads', results.items);
+
+    for (let i = 0; i < 20; i++) {
+      await store.put(
+        dataFactory.quad(
+          dataFactory.namedNode("http://ex.com/s" + i),
+          dataFactory.namedNode("http://ex.com/p" + i),
+          dataFactory.namedNode("http://ex.com/o" + i),
+          dataFactory.namedNode("http://ex.com/g")
+        )
+      );
+    }
+    
+    console.log("Put succeded.");
+    
+    await store.close();
+    console.log('We have closed the store');
+  };
+
+  main().catch((err) => {
+    console.error(err);
+  });
+
+  
 
   let queryElement
   let resultElement
@@ -22,9 +68,8 @@
       }
     })
     const origQueryFunction = yasqe.query;
-    /*yasqe.query = function() {
-      const sparqlEngineInstance = new SparqlEngine(store);
-      sparqlEngineInstance.query(yasqe.getValue(), 'application/sparql-results+json'
+    yasqe.query = function() {
+      store.sparql(yasqe.getValue(), 'application/sparql-results+json'
       ).catch((err) => {
           console.log("err: ", err);
       }).then((result) => {
@@ -32,7 +77,7 @@
           yasr.setResponse(result);
       });
       return Promise.resolve(true);
-    }*/
+    }
   });
 </script>
 
