@@ -5,6 +5,7 @@
   import {Quadstore} from 'quadstore'
   import * as dataFactory from '@rdfjs/data-model'
   import leveljs from 'level-js';
+  import {link} from 'svelte-spa-router'
 
 
   const main = async () => {
@@ -68,7 +69,12 @@
       }
     })
     const origQueryFunction = yasqe.query;
-    yasqe.query = function() {
+    yasqe.query = async function() {
+      const store = new Quadstore({
+        dataFactory,
+        backend: leveljs('quadstore'),
+      });
+      await store.open();
       store.sparql(yasqe.getValue(), 'application/sparql-results+json'
       ).catch((err) => {
           console.log("err: ", err);
@@ -76,7 +82,8 @@
           console.log("result!: ", result);
           yasr.setResponse(result);
       });
-      return Promise.resolve(true);
+      await store.clode();
+      return true;
     }
   });
 </script>
@@ -89,6 +96,7 @@
   </style>
   <div class="columns">
     <div class="column">
+      <a href="/" use:link>&lt;- back to entry page</a>
       <h1>PatchGraph</h1>
       <br />
       <div bind:this={queryElement}>editor</div>
