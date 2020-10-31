@@ -83,10 +83,11 @@
         });
       } catch (e) {
         console.log('exception executing sparql', e)
-        yasr.setResponse({ 
-          data: e,
-          contentType: "text/plain"
-        });
+        e.response = {
+            status: 400,
+            text: e.message
+          };
+        yasr.setResponse(e);
       }
       await store.close();
       return true;
