@@ -33,7 +33,7 @@
         dataFactory.quad(
           dataFactory.namedNode("http://ex.com/s" + i),
           dataFactory.namedNode("http://ex.com/p" + i),
-          dataFactory.namedNode("http://ex.com/o" + i),
+          dataFactory.literal("A literal for statement " + i,"en"),
           dataFactory.namedNode("http://ex.com/g")
         )
       );
@@ -76,11 +76,25 @@
       await store.open();
       try {
         const result = await store.sparql(yasqe.getValue())
-        console.log("result!: ", result);
-        yasr.setResponse({ 
-          data: result,
-          contentType: "application/json"
-        });
+        console.log("result: ", result);
+        const resultSet = {
+          head: {
+            vars: result.variables.map(v => v.substr(1))
+          },
+          results: {
+            bindings: result.items.map(binding => 
+              Object.fromEntries(Object.entries(binding).map(
+                pair => [pair[0].substr(1),{
+                  value: pair[1].value,
+                    type: pair[1].datatype && (pair[1].datatype.value === 'http://www.w3.org/2001/XMLSchema#string' || pair[1].datatype.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#langString')?
+                      'literal' :
+                      pair[1].termType === 'BlankNode'? 'bnode' : 'uri',
+                  'xml:lang' : pair[1].language
+                }])
+              ))
+          }
+        }
+        yasr.setResponse(resultSet);
       } catch (e) {
         console.log('exception executing sparql', e)
         e.response = {
