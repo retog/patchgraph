@@ -16,4 +16,5 @@
     <li><a href="https://github.com/TriplyDB/Yasgui">Yasgui</a></li>
     <li><a href="https://github.com/linked-solutions/rdfjs-svelte">rdfjs-svelte</a></li>
   </ul>
+  <p>Finde the sources of this project on <a href="https://github.com/retog/patchgraph">GitHub</a>.</p>
 </main>
