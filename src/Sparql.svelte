@@ -7,47 +7,35 @@
   import leveljs from 'level-js';
   import {link} from 'svelte-spa-router'
 
-
-  const main = async () => {
-    console.log('Ok, if we\'re here the browser has loaded everything correctly');
-    console.log('lelevjs', leveljs)
-    const backend = leveljs('quadstore')
-    const store = new Quadstore({
-      dataFactory,
-      backend: leveljs('quadstore'),
-    });
-    console.log('We have instantiated the store');
-    await store.open();
-    console.log('We have opened the store');
-    await store.put(dataFactory.quad(
-      dataFactory.namedNode('http://example.com/theanswer'),
-      dataFactory.namedNode('http://example.com/is'),
-      dataFactory.literal('42', dataFactory.namedNode('https://www.w3.org/2001/XMLSchema#interger')),
-    ));
-    console.log('We have added a quad');
-    const results = await store.get({});
-    console.log('We have queried the store and got the following quads', results.items);
-
-    for (let i = 0; i < 20; i++) {
-      await store.put(
-        dataFactory.quad(
-          dataFactory.namedNode("http://ex.com/s" + i),
-          dataFactory.namedNode("http://ex.com/p" + i),
-          dataFactory.literal("A literal for statement " + i,"en"),
-          dataFactory.namedNode("http://ex.com/g")
-        )
-      );
+  let examples = [
+    {
+      name: 'Select Books',
+      value: `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX schema: <http://schema.org/>
+SELECT * WHERE { ?p rdf:type schema:Book}`
+    },
+    {
+      name: 'Select all quads',
+      value: `SELECT * WHERE { GRAPH ?g { ?s ?p ?o} }`
+    },
+    {
+      name: 'Delete all quads',
+      value: `DELETE { GRAPH ?g { ?s ?p ?o} } WHERE { GRAPH ?g { ?s ?p ?o} }`
+    },
+    {
+      name: 'Add Book',
+      value: `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX schema: <http://schema.org/>
+INSERT DATA
+{ 
+  <http://example/book1> a schema:Book ;
+                         schema:name "A new book" ;
+                         schema:author "A.N.Other" .
+}`
     }
-    
-    console.log("Put succeded.");
-    
-    await store.close();
-    console.log('We have closed the store');
-  };
+  ]
 
-  main().catch((err) => {
-    console.error(err);
-  });
+  let selectedExample;
 
   
 
@@ -55,12 +43,17 @@
   let resultElement
 
   afterUpdate(() => {
+    queryElement.innerHTML = ''
     const yasqe = new YASQE(queryElement, {
       requestConfig: {
         showQueryButton: true,
         endpoint: "https://query.wikidata.org/bigdata/namespace/wdq/sparql"
       }
     })
+    if (selectedExample && selectedExample.value) {
+      yasqe.setValue(selectedExample.value)
+    }
+    resultElement.innerHTML = ''
     const yasr = new YASR(resultElement, {
       pluginOrder: ['table', 'response'],
       prefixes: {
@@ -76,8 +69,8 @@
       await store.open();
       try {
         const result = await store.sparql(yasqe.getValue())
-        console.log("result: ", result);
-        const resultSet = {
+        console.log("result of "+yasqe.getQueryType(), result);
+        const resultSet = result.variables ? {
           head: {
             vars: result.variables.map(v => v.substr(1))
           },
@@ -88,12 +81,12 @@
                   value: pair[1].value,
                     type: pair[1].datatype && (pair[1].datatype.value === 'http://www.w3.org/2001/XMLSchema#string' || pair[1].datatype.value === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#langString')?
                       'literal' :
-                      pair[1].termType === 'BlankNode'? 'bnode' : 'uri',
+                      pair[1].termType === 'BlankNode'? 'bnode' : pair[1].termType === 'DefaultGraph'? 'defaultGraph':'uri',
                   'xml:lang' : pair[1].language
                 }])
               ))
           }
-        }
+        } : result
         yasr.setResponse(resultSet);
       } catch (e) {
         console.log('exception executing sparql', e)
@@ -120,8 +113,19 @@
       <a href="/" use:link>&lt;- back to entry page</a>
       <h1>PatchGraph</h1>
       <br />
-      <div bind:this={queryElement}>editor</div>
-      <div bind:this={resultElement}>result</div>
+      <div style="display: flex">
+        <div style="flex: 1"></div>
+        <select bind:value={selectedExample}>
+          <option>... choose example ...</option>
+          {#each examples as example}
+          <option value={example}>{example.name}</option>
+          {/each}
+        </select>
+      </div>
+      <div>
+        <div bind:this={queryElement}></div>
+        <div bind:this={resultElement}></div>
+      </div>
     </div>
   </div>
 </div>
