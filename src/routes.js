@@ -1,12 +1,12 @@
 import Entry from './Entry.svelte'
-import Components from './Components.svelte'
+import AllQuads from './AllQuads.svelte'
 import Sparql from './Sparql.svelte'
 
 const routes = { 
   
   '/':Entry,
   '/index.html':Entry,
-  '/components': Components,
+  '/all-quads': AllQuads,
   '/sparql': Sparql,
   '*':Entry
 }

@@ -61,12 +61,13 @@
 </style>
 
 <main>
-  <h1>RDFJS-Svelte</h1>
+  <h1>MyQuads</h1>
 
-  <p>Try out the Dataset Browser below or any component <a href="/components" use:link>here</a>.</p>
-  <p>Use SPARQL <a href="/sparql" use:link>here</a>.</p>
-  <DatasetBrowser
-    bind:value={dataset}
-    subject="http://example.org/person/sheldon-cooper"
-    graph={Factory.defaultGraph()} />
+  <p>Store triples and quads in your browser and use SPARQL to retreive them.</p>
+  <ul>
+    <li>[Quadstore](https://github.com/beautifulinteractions/node-quadstore)
+    </li>
+    <li>[Yasgui](https://github.com/TriplyDB/Yasgui)</li>
+    <li>[rdfjs-svelte](https://github.com/linked-solutions/rdfjs-svelte)</li>
+  </ul>
 </main>

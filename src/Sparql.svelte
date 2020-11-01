@@ -110,9 +110,7 @@ INSERT DATA
   </style>
   <div class="columns">
     <div class="column">
-      <a href="/" use:link>&lt;- back to entry page</a>
-      <h1>PatchGraph</h1>
-      <br />
+      <h1>SPARQL</h1>
       <div style="display: flex">
         <div style="flex: 1"></div>
         <select bind:value={selectedExample}>
