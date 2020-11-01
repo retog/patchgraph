@@ -7,7 +7,10 @@
 
   let dataset = Dataset.dataset([]);
 
+  let previousQuads;
+  
   const load = async function () {
+    console.log("loading data from store");
     const store = new Quadstore({
       dataFactory: Factory,
       backend: leveljs("quadstore"),
@@ -15,13 +18,31 @@
     await store.open();
     //const pattern = {graph: Factory.namedNode('http://ex.com/g')};
     const { items } = await store.get({});
-    dataset = Dataset.dataset(items);
+    previousQuads = items;
+    items.forEach(quad => dataset.add(quad))
+    dataset = dataset //svelte yahee!
+    //dataset = Dataset.dataset(items);
+    await store.close()
   };
   load().catch((e) => console.log(e));
-  $: console.log("dataset", dataset);
+  const updateStore = async function (currentQuads) {
+    if (!previousQuads) return
+    const store = new Quadstore({
+      dataFactory: Factory,
+      backend: leveljs("quadstore"),
+    });
+    await store.open();
+    await store.multiPatch(previousQuads, currentQuads)
+    previousQuads = currentQuads
+    await store.close()
+  }
+  $: {
+    console.log("dataset", dataset);
+    updateStore(Array.from(dataset.quads)).then(() => console.log('store updated'));
+  }
 </script>
 
 <main>
-  <h1>Dataset</h1>
+  <h1 id="resr">Dataset</h1>
   <DatasetEditor bind:value={dataset} />
 </main>
