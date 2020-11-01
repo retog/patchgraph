@@ -1,11 +1,7 @@
 <script>
   import * as Factory from "@rdfjs/data-model";
   import Dataset from "@rdfjs/dataset";
-  import { SimpleLiteralEditor, HtmlEditor, 
-      BlankNodeEditor, NamedNodeEditor, 
-      ExistingTermEditor, TermEditor,
-      QuadEditor, DatasetEditor, DatasetBrowser } from "rdfjs-svelte";
-  import {link} from 'svelte-spa-router'
+  import { DatasetEditor } from "rdfjs-svelte";
   import {Quadstore} from 'quadstore'
   import leveljs from 'level-js';
 
@@ -29,7 +25,7 @@
 
 <main>
 
-  <h2>Dataset</h2>
+  <h1>Dataset</h1>
   <DatasetEditor bind:value={dataset} />
 
 </main>
