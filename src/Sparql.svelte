@@ -47,7 +47,7 @@ INSERT DATA
     const yasqe = new YASQE(queryElement, {
       requestConfig: {
         showQueryButton: true,
-        endpoint: "https://query.wikidata.org/bigdata/namespace/wdq/sparql"
+        endpoint: ""
       }
     })
     if (selectedExample && selectedExample.value) {
