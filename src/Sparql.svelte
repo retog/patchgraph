@@ -104,6 +104,7 @@ INSERT DATA
     })
 
     if (Object.keys(yasgui._tabs).length === 1) {
+      const firstTab = yasgui.getTab()
       examples.forEach(example => {
         const tab = yasgui.addTab(
           true, // set as active tab
@@ -111,6 +112,7 @@ INSERT DATA
         )
         tab.setQuery(example.value)
       })
+      firstTab.show()
     }
   });
 </script>
