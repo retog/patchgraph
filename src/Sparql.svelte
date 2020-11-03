@@ -112,7 +112,7 @@ INSERT DATA
         )
         tab.setQuery(example.value)
       })
-      firstTab.show()
+      yasgui.markTabSelected(firstTab.getId())
     }
   });
 </script>
