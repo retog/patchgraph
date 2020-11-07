@@ -74,6 +74,10 @@ INSERT DATA
               ))
           }
         } : result
+        const queryType = this.getQueryType()
+        if (['INSERT', 'DELETE'].indexOf(queryType) > -1) {
+          storeUpdateStatement(this.getValue())
+        }
         this.emit("queryResponse", resultSet, Date.now() - queryStart);
         this.emit("queryResults", resultSet, Date.now() - queryStart);
         await store.close();
@@ -115,6 +119,17 @@ INSERT DATA
       yasgui.markTabSelected(firstTab.getId())
     }
   });
+
+  function storeUpdateStatement(stmt) {
+    if (typeof sbot !== 'undefined') {
+      sbot.publish({
+          type: 'patchgraph-update',
+          value: stmt
+      }, function (err, msg) {
+          console.log(msg);
+      });
+    }
+  }
 </script>
 
 <div class="container">
