@@ -3,20 +3,67 @@
   import { routes } from './routes'
   import { link } from 'svelte-spa-router'
   import active from 'svelte-spa-router/active'
+  import {Quadstore} from 'quadstore'
+  import * as dataFactory from '@rdfjs/data-model'
+  import leveljs from 'level-js';
 
   document.title = 'MyQuads'
+
+  if (typeof sbot !== 'undefined') {
+    const store = new Quadstore({
+        dataFactory,
+        backend: leveljs('quadstore'),
+      });
+    async function reloadStore() {
+      await store.open();
+      await store.sparql('DELETE { GRAPH ?g { ?s ?p ?o} } WHERE { GRAPH ?g { ?s ?p ?o} }')
+      const opts = {
+        reverse: false,
+        query: [
+          {
+            $filter: {
+              value: {
+                content: { type: 'patchgraph-update' }
+              }
+            }
+          }
+        ]
+      }
+      const result = await new Promise((resolve, reject) =>  {
+        pull(sbot.query.read(opts), pull.collect(function (err, msgs) {
+          function executeSequentially(promises) {
+            const last = promises.pop()
+            return promises.length === 0 ? last() : executeSequentially(promises).then(() => {
+              return last()
+            })
+          }
+          
+          const sequentialPromises = executeSequentially(msgs.map(msg => {
+            if (!msg.value) {
+              return;
+            }
+            const sparqlStatement = msg.value.content.value
+            return () => store.sparql(sparqlStatement)
+          }))
+          sequentialPromises.then(() => resolve())
+        }))
+      })
+      return result
+    }
+    reloadStore()
+  }
 </script>
 
 <style>
   ul#menu li {
-    display:inline;
+    display: inline;
   }
 
   ul#menu li:not(:first-child) ::before {
-    content:' | ';
+    content: " | ";
   }
   :global(a.active) {
-      color: red;
+    color: red;
   }
   :global(h1) {
     color: #ff3e00;
