@@ -3,7 +3,9 @@
   import {afterUpdate} from 'svelte'
   import {Quadstore} from 'quadstore'
   import * as dataFactory from '@rdfjs/data-model'
-  import leveljs from 'level-js';
+  import Dataset from '@rdfjs/dataset'
+  import leveljs from 'level-js'
+  import * as N3  from 'n3'
   import {link} from 'svelte-spa-router'
 
   let examples = [
@@ -16,6 +18,10 @@ SELECT * WHERE { ?p rdf:type schema:Book}`
     {
       name: 'Select all quads',
       value: `SELECT * WHERE { GRAPH ?g { ?s ?p ?o} }`
+    },
+    {
+      name: 'Graph from all quads',
+      value: `CONSTRUCT { ?s ?p ?o} WHERE { GRAPH ?g { ?s ?p ?o} }`
     },
     {
       name: 'Delete all quads',
@@ -41,6 +47,14 @@ INSERT DATA
   let queryElement
   let resultElement
   let yasguiElement
+
+  function serialize(dataset) {
+    const writer = new N3.Writer({ prefixes: { rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#' } });
+    writer.addQuads(Array.from(dataset.quads))
+    return new Promise((resolve, reject) => {
+      writer.end((error, result) => resolve(result));
+    })
+  }
 
   afterUpdate(() => {
 
@@ -73,13 +87,20 @@ INSERT DATA
                 }])
               ))
           }
-        } : result
+        } : result.type === 'quads'? serialize(Dataset.dataset(result.items)).then(text => ({
+          status: 200,
+          header: {
+            'content-type': 'text/turtle'
+          },
+          xhr: true,
+          text
+        })) : result
         const queryType = this.getQueryType()
         if (['INSERT', 'DELETE'].indexOf(queryType) > -1) {
           storeUpdateStatement(this.getValue())
         }
-        this.emit("queryResponse", resultSet, Date.now() - queryStart);
-        this.emit("queryResults", resultSet, Date.now() - queryStart);
+        Promise.resolve(resultSet).then(r => this.emit('queryResponse', r, Date.now() - queryStart));
+        //this.emit("queryResults", resultSet, Date.now() - queryStart);
         await store.close();
         return resultSet
         //yasr.setResponse(resultSet);
