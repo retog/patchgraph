@@ -62,6 +62,7 @@ INSERT DATA
 
 
     Yasqe.prototype.query = async function() {
+      this.queryBtn.className = this.queryBtn.className += " busy";
       const queryStart = Date.now();
       const store = new Quadstore({
         dataFactory,
@@ -99,7 +100,8 @@ INSERT DATA
         if (['INSERT', 'DELETE'].indexOf(queryType) > -1) {
           storeUpdateStatement(this.getValue())
         }
-        Promise.resolve(resultSet).then(r => this.emit('queryResponse', r, Date.now() - queryStart));
+        Promise.resolve(resultSet).then(r => this.emit('queryResponse', r, Date.now() - queryStart)).then(
+          () => this.queryBtn.className = this.queryBtn.className.replace("busy", ""));
         //this.emit("queryResults", resultSet, Date.now() - queryStart);
         await store.close();
         return resultSet
@@ -112,7 +114,7 @@ INSERT DATA
           };
         console.log('emmitting error queryResponse', e.response)
         this.emit("queryResponse", e, Date.now() - queryStart);
-        console.log('emmitted error queryResponse', e.response)
+        () => this.queryBtn.className = this.queryBtn.className.replace("busy", "")
         this.emit("error", e);
         await store.close();
         throw e;
