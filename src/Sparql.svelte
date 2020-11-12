@@ -143,11 +143,16 @@ INSERT DATA
 
   function storeUpdateStatement(stmt) {
     if (typeof sbot !== 'undefined') {
+      console.log('Publishing update statement of '+stmt.length+' characters to feed.')
       sbot.publish({
           type: 'patchgraph-update',
           value: stmt
       }, function (err, msg) {
+        if (err) {
+          console.log('error adding to feed', err)
+        } else {
           console.log(msg);
+        }
       });
     }
   }
