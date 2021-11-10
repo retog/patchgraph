@@ -7,6 +7,7 @@
   import leveljs from 'level-js'
   import * as N3  from 'n3'
   import {link} from 'svelte-spa-router'
+  import {newEngine} from 'quadstore-comunica';
 
   let examples = [
     {
@@ -67,6 +68,7 @@ INSERT DATA
       const store = new Quadstore({
         dataFactory,
         backend: leveljs('quadstore'),
+        comunica: newEngine(), 
       });
       await store.open();
       try {
